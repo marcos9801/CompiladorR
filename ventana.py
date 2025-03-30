@@ -1,4 +1,4 @@
-from tkinter import Tk, Menu
+from tkinter import Tk, Menu, PhotoImage
 from os import path
 
 directorio_actual = path.dirname(__file__) 
@@ -6,10 +6,76 @@ directorio_actual = path.dirname(__file__)
 class Ventana:
     def __init__(self):
         self.ventana = Tk()
-        self.ventana.title("Compilador")
+        self.ventana.title("Compilador lenguaje R")
         self.ventana.geometry("800x600")
+        #iconos utilizados en el menu superior
+        self.save_icon = PhotoImage(file=directorio_actual + "/assets/menu_archivo/save.png").subsample(2, 2)
+        self.clean_icon = PhotoImage(file=directorio_actual + "/assets/menu_archivo/clean.png").subsample(2, 2)
+        self.close_icon = PhotoImage(file=directorio_actual + "/assets/menu_archivo/close.png").subsample(2, 2)
+        self.exit_icon = PhotoImage(file=directorio_actual + "/assets/menu_archivo/exit.png").subsample(2, 2)
+        self.lexico_icon = PhotoImage(file=directorio_actual + "/assets/menu_compiladores/lexico.png").subsample(2, 2)
+        self.sintactico_icon = PhotoImage(file=directorio_actual + "/assets/menu_compiladores/sintactico.png").subsample(2, 2)
+        self.semantico_icon = PhotoImage(file=directorio_actual + "/assets/menu_compiladores/semantico.png").subsample(2, 2)
+        self.generar_codigo= PhotoImage(file=directorio_actual + "/assets/menu_compiladores/generar.png").subsample(2, 2)
+        self.objeto =  PhotoImage(file=directorio_actual + "/assets/menu_compiladores/objeto.png").subsample(2, 2)
+        self.int_icon = PhotoImage(file=directorio_actual + "/assets/menu_variables/int.png").subsample(2, 2)
+        self.float_icon = PhotoImage(file=directorio_actual + "/assets/menu_variables/float.png").subsample(2, 2)
+        self.char_icon = PhotoImage(file=directorio_actual + "/assets/menu_variables/char.png").subsample(2, 2)
+        self.double_icon = PhotoImage(file=directorio_actual + "/assets/menu_variables/double.png").subsample(2, 2)
+
         self.menuSuperior()
-        self.ventana.mainloop()
+
+    def menu_archivo(self):
+
+        menu_archivo = Menu(self.menu, tearoff=0)
+        menu_archivo.add_command(label="Guardar", accelerator="Ctrl+G", image=self.save_icon, compound="left")
+        menu_archivo.add_command(label="Limpiar pantalla", accelerator="Ctrl+L", image=self.save_icon, compound="left")
+        menu_archivo.add_command(label="Cerrar", accelerator="Ctrl+W",  image=self.close_icon, compound="left")
+        menu_archivo.add_separator()
+        menu_archivo.add_command(label="Salir", command=self.ventana.quit, accelerator="Ctrl+Q", image=self.exit_icon, compound="left")
+
+        return menu_archivo
+    def menu_editar(self):
+
+        menu_archivo = Menu(self.menu, tearoff=0)
+
+        return menu_archivo
+    def menu_ejectuar(self):
+
+        menu_ejecutar = Menu(self.menu, tearoff=0)
+
+        return menu_ejecutar
+    def menu_compiladores(self):
+        menu_compiladores = Menu(self.menu, tearoff=0)
+        menu_compiladores.add_command(label="Analizador Léxico", accelerator="Alt+L", image=self.lexico_icon, compound="left")
+        menu_compiladores.add_command(label="Analizador Sintáctico", accelerator="Alt+S", image=self.sintactico_icon, compound="left")
+        menu_compiladores.add_command(label="Analizador Semántico", accelerator="Alt+M", image=self.semantico_icon, compound="left")
+        menu_compiladores.add_command(label="Generador de Código", accelerator= "Alt+G", image=self.generar_codigo, compound="left")
+        menu_compiladores.add_command(label="Codigo Objeto", accelerator="Alt+C", image=self.objeto, compound="left")
+        return menu_compiladores
+    def menu_ayuda(self):
+        #TODO: actualizar con libreria de R
+        menu_ayuda = Menu(self.menu, tearoff=0)
+        submenu_librerias = Menu(menu_ayuda, tearoff=0)
+        menu_ayuda.add_cascade(label="Librerías", menu=submenu_librerias)
+        submenu_librerias.add_command(label="stdio.h")
+        submenu_librerias.add_command(label="conio.h")
+        submenu_librerias.add_command(label="math.h")
+        submenu_librerias.add_command(label="string.h")
+        submenu_librerias.add_command(label="stdlib.h")
+        submenu_librerias.add_command(label="ctype.h")
+        submenu_variables = Menu(menu_ayuda, tearoff=0)
+        # depois
+        return menu_ayuda
+    def menu_variables(self):
+        menu_variables = Menu(self.menu, tearoff=0)
+        menu_tipos = Menu(menu_variables, tearoff=0)
+        menu_variables.add_cascade(label="Tipos", menu=menu_tipos)
+        menu_tipos.add_command(label="int", image=self.int_icon, compound='left')
+        menu_tipos.add_command(label="float", image=self.float_icon, compound='left')
+        menu_tipos.add_command(label="char", image=self.char_icon, compound='left')
+        menu_tipos.add_command(label="double", image=self.double_icon, compound='left')
+        return menu_variables
 
     def menuSuperior(self):
         self.menu = Menu(self.ventana)
@@ -21,45 +87,17 @@ class Ventana:
         else:
             appmenu = self.menu
         # Menú Archivo
-        menu_archivo = Menu(self.menu, tearoff=0)
-        #menu_archivo.add_command(label="Abrir", image=PhotoImage(file=directorio_actual + "/Icons/abrir.png"))
-        menu_archivo.add_command(label="Guardar", accelerator="Ctrl+G")
-        menu_archivo.add_command(label="Limpiar pantalla", accelerator="Ctrl+L")
-        menu_archivo.add_command(label="Cerrar", accelerator="Ctrl+W")
-        menu_archivo.add_separator()
-        menu_archivo.add_command(label="Salir", command=self.ventana.quit, accelerator="Ctrl+Q")
+        menu_archivo = self.menu_archivo()
         # Menú Editar   
-        menu_editar = Menu(self.menu, tearoff=0)
+        menu_editar = self.menu_editar()
         #menu Ejecutar
-        menu_ejecutar =Menu(self.menu, tearoff=0)
+        menu_ejecutar = self.menu_ejectuar()
         #menu Compiladores
-        menu_compiladores = Menu(self.menu, tearoff=0)
-        menu_compiladores.add_command(label="Analisador Léxico", accelerator="Alt+L")
-        menu_compiladores.add_command(label="Analisador Sintáctico", accelerator="Alt+S")
-        menu_compiladores.add_command(label="Analisador Semántico", accelerator="Alt+M")
-        menu_compiladores.add_command(label="Generador de Código")
-        menu_compiladores.add_command(label="Codigo Objeto")
+        menu_compiladores = self.menu_compiladores()
         # Menú Ayuda
-        menu_ayuda = Menu(self.menu, tearoff=0)
-        submenu_librerias = Menu(menu_ayuda, tearoff=0)
-        menu_ayuda.add_cascade(label="Librerías", menu=submenu_librerias)
-        submenu_librerias.add_command(label="stdio.h")
-        submenu_librerias.add_command(label="conio.h")
-        submenu_librerias.add_command(label="math.h")
-        submenu_librerias.add_command(label="string.h")
-        submenu_librerias.add_command(label="stdlib.h")
-        submenu_librerias.add_command(label="ctype.h")
-        submenu_variables = Menu(menu_ayuda, tearoff=0)
-        #depois
+        menu_ayuda = self.menu_ayuda()
         #meu variables
-        menu_variables = Menu(self.menu, tearoff=0)
-        menu_tipos = Menu(menu_variables, tearoff=0)
-        menu_variables.add_cascade(label="Tipos", menu=menu_tipos)
-        menu_tipos.add_command(label="int")
-        menu_tipos.add_command(label="float")
-        menu_tipos.add_command(label="char")
-        menu_tipos.add_command(label="double")
-
+        menu_variables = self.menu_variables()
         # Agregar al menú principal
         self.menu.add_cascade(label="Archivo", menu=menu_archivo)
         self.menu.add_cascade(label="Editar", menu=menu_editar)
@@ -71,4 +109,5 @@ class Ventana:
         self.ventana.config(menu=self.menu)
 
 if __name__ == "__main__":
-    Ventana()
+    app = Ventana()
+    app.ventana.mainloop()
