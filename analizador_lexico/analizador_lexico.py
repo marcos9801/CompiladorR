@@ -41,6 +41,9 @@ class AnalizadorLexicoR:
                 posicion += 1
         return self.tokens
 
+
+
+
 if __name__ == '__main__':
     # Ejemplo de código R
     codigo_r = """

@@ -1,5 +1,6 @@
 from tkinter import Tk, Menu, PhotoImage, Entry, Text
 from os import path
+from tabulate import tabulate
 
 from analizador_lexico.analizador_lexico import AnalizadorLexicoR
 
@@ -142,13 +143,11 @@ class Ventana:
         self.output_texto(self.obtener_input())
 
     def analizar_lexico(self):
-        analizador = AnalizadorLexicoR()
-        salida_analizador = (analizador.analizar(self.obtener_input()))
+        self.analizador_lexico = AnalizadorLexicoR()
+        self.analizador_lexico.analizar(self.obtener_input())
         texto = "ANALISIS LEXICO \n"
         texto += "-" * 20 + "\n"
-        for tipo, identificador in salida_analizador:
-            texto += tipo + " << " + str(identificador) + "\n"
-
+        texto += tabulate(self.analizador_lexico.tokens, headers=["Tipo de Token", "Valor"], tablefmt="grid")
         self.output_texto(texto)
         pass
 
