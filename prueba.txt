@@ -1,0 +1,6 @@
+1x <- 10
+T <- TRUE
+cadena -> "si
+if (x > 5) {
+   print("Mayor que 5")
+}

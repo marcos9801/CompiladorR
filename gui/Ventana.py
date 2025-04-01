@@ -147,7 +147,11 @@ class Ventana:
         self.analizador_lexico.analizar(self.obtener_input())
         texto = "ANALISIS LEXICO \n"
         texto += "-" * 20 + "\n"
-        texto += tabulate(self.analizador_lexico.tokens, headers=["Tipo de Token", "Valor"], tablefmt="grid")
+        print("pasa aqui")
+        texto += tabulate(self.analizador_lexico.tokens, headers="keys", tablefmt="grid")
+        texto += "\n"
+        texto += "Errores Encontrados"
+        texto += tabulate(self.analizador_lexico.errores, headers="keys", tablefmt="grid")
         self.output_texto(texto)
         pass
 
