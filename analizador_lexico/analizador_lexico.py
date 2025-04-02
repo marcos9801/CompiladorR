@@ -17,7 +17,7 @@ class AnalizadorLexicoR:
         self.linea = 1  # Contador de líneas
         self.columna = 1  # Contador de columnas
         self.patrones = {
-            'PALABRA_RESERVADA': r'\b(if|else|while|for|function|return|break|next|switch|TRUE|FALSE|NULL|NA|Inf|NaN|in|repeat)\b',
+            'PALABRA_RESERVADA': r'\b(if|else|while|for|function|return|break|next|switch|TRUE|FALSE|NULL|NA|Inf|NaN|print|in|repeat)\b',
             'OPERADOR': r'(<-|<<-|->|=|\+|-|\*|/|%|^|&|\||!|>=|<=|==|!=|<|>)',
             'NUMERO': r'\b\d*\.\d+|\d+\b',
             'IDENTIFICADOR': r'[a-zA-Z0-9_][a-zA-Z0-9_]*',
@@ -116,13 +116,16 @@ class AnalizadorLexicoR:
 
         return self.tokens
 
-    def if_analisis(self, linea):
-        pass
 
 if __name__ == '__main__':
     codigo_r = """
     1x <- 10
     c <- TRUE
+    color <- switch(tipo_fruta,
+               manzana = "rojo",
+               platano = "amarillo",
+               uva = "morado",
+               "color desconocido")
     cadena -> "si
     if (x > 5) {
         print("Mayor que 5")
