@@ -2,7 +2,7 @@ from tkinter import Tk, Menu, PhotoImage, Entry, Text
 from os import path
 from tabulate import tabulate
 
-from analizador_lexico.analizador_lexico import AnalizadorLexicoR
+from analizador_semantico.analizador_semantico import AnalizadorSemanticoR
 
 directorio_actual = path.dirname(__file__) 
 
@@ -25,8 +25,8 @@ class Ventana:
         self.float_icon = PhotoImage(file=directorio_actual + "/assets/menu_variables/float.png").subsample(2, 2)
         self.char_icon = PhotoImage(file=directorio_actual + "/assets/menu_variables/char.png").subsample(2, 2)
         self.double_icon = PhotoImage(file=directorio_actual + "/assets/menu_variables/double.png").subsample(2, 2)
-
         self.menuSuperior()
+        self.compilador = AnalizadorSemanticoR()
         self.editores()
 
     def menu_archivo(self):
@@ -56,6 +56,7 @@ class Ventana:
         menu_compiladores.add_command(label="Analizador Semántico", accelerator="Alt+M", image=self.semantico_icon, compound="left")
         menu_compiladores.add_command(label="Generador de Código", accelerator= "Alt+G", image=self.generar_codigo, compound="left")
         menu_compiladores.add_command(label="Codigo Objeto", accelerator="Alt+C", image=self.objeto, compound="left")
+
         return menu_compiladores
     def menu_ayuda(self):
         #TODO: actualizar con libreria de R
@@ -143,15 +144,14 @@ class Ventana:
         self.output_texto(self.obtener_input())
 
     def analizar_lexico(self):
-        self.analizador_lexico = AnalizadorLexicoR()
-        self.analizador_lexico.analizar(self.obtener_input())
+        self.compilador.analizador_sintactico.analizador_lexico.analizar(self.obtener_input())
         texto = "ANALISIS LEXICO \n"
         texto += "-" * 20 + "\n"
         print("pasa aqui")
-        texto += tabulate(self.analizador_lexico.tokens, headers="keys", tablefmt="grid")
+        texto += tabulate( self.compilador.analizador_sintactico.analizador_lexico.tokens, headers="keys", tablefmt="grid")
         texto += "\n"
         texto += "Errores Encontrados"
-        texto += tabulate(self.analizador_lexico.errores, headers="keys", tablefmt="grid")
+        texto += tabulate( self.compilador.analizador_sintactico.analizador_lexico.errores, headers="keys", tablefmt="grid")
         self.output_texto(texto)
         pass
 
