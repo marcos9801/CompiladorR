@@ -1,11 +1,9 @@
 from analizador_lexico.analizador_lexico import AnalizadorLexicoR
 
-
 class Nodo:
     def __init__(self, valor=None):
         self.valor = valor
         self.children = []
-
 
 class AnalizadorSintacticoR:
     def __init__(self):
@@ -40,7 +38,7 @@ class AnalizadorSintacticoR:
         while self.posicion < len(self.tokens):
             self.declaracion(self.AST)
 
-    def declaracion(self, nodo, b_if = False):
+    def declaracion(self, nodo, b_if=False):
         if self.posicion >= len(self.tokens):
             return
         token = self.tokens[self.posicion]
@@ -53,24 +51,23 @@ class AnalizadorSintacticoR:
             self.declaracion_sentencia(nodo, b_if)
         else:
             self.posicion += 1
+
     def declaracion_print(self, nodo):
-        #TODO: validacion de print con comas
         if self.posicion >= len(self.tokens) - 3:
-            self.agregar_error_sintactico("Sentencia print incorrrecta")
+            self.agregar_error_sintactico("Sentencia print incorrecta")
             return
         n_print = Nodo("print")
         self.posicion += 1
         if self.tokens[self.posicion]['valor'] != '(':
-            self.agregar_error_sintactico("Se esperaba un parentesis de abertura ")
+            self.agregar_error_sintactico("Se esperaba un paréntesis de apertura")
             return
-        n_print.children.append(Nodo(self.tokens[self.posicion]['valor'])) #agregar (
         self.posicion += 1
-        n_print.children.append(Nodo(self.tokens[self.posicion]['valor'])) #agregar token a imprimir
+        n_print.children.append(Nodo(self.tokens[self.posicion]['valor']))  # agregar token a imprimir
         self.posicion += 1
         if self.tokens[self.posicion]['valor'] != ')':
-            self.agregar_error_sintactico("Se esperaba un parentesis de cierre")
+            self.agregar_error_sintactico("Se esperaba un paréntesis de cierre")
             return
-        n_print.children.append(Nodo(self.tokens[self.posicion]['valor'])) #agregar )
+        self.posicion += 1
         nodo.children.append(n_print)
 
     def declaracion_if(self, nodo):
@@ -111,8 +108,8 @@ class AnalizadorSintacticoR:
         nodo_if.children.append(bloque)
         nodo.children.append(nodo_if)
 
-    def declaracion_sentencia(self, nodo, b_if = False):
-        #TODO: arreglar lo de los espacios
+    def declaracion_sentencia(self, nodo, b_if=False):
+
         if self.posicion >= len(self.tokens) - 2:  # Evita acceso fuera de rango
             self.agregar_error_sintactico("Sentencia incorrecta")
             return
@@ -130,18 +127,21 @@ class AnalizadorSintacticoR:
             self.agregar_error_sintactico("Se esperaba un operador de asignación (<-, ->, =)")
             return
         if b_if and self.tokens[self.posicion]['valor'] not in ("<", ">", "=="):
-            self.agregar_error_sintactico("Se esperaba un operador de comparacion (<,> , ==)")
+            self.agregar_error_sintactico("Se esperaba un operador de comparación (<, >, ==)")
             return
         nodo_sentencia.children.append(Nodo(self.tokens[self.posicion]['valor']))
         self.posicion += 1
+        if self.tokens[self.posicion]['tipo'] == "PALABRA_RESERVADA" and self.tokens[self.posicion]['valor'] == "switch":
+            self.declaracion_switch(nodo_sentencia)
+            nodo.children.append(nodo_sentencia)
+            return
 
         # Valor asignado
         if self.tokens[self.posicion]['tipo'] not in ("PALABRA_RESERVADA", "NUMERO", "CADENA_CORRECTA"):
             self.agregar_error_sintactico("Valor asignado inválido")
             return
-        #mandar a Switch
         if self.tokens[self.posicion]['valor'] == "switch":
-            self.validar_switch(nodo_sentencia)
+            self.declaracion_switch(nodo_sentencia)
         else:
             nodo_sentencia.children.append(Nodo(self.tokens[self.posicion]['valor']))
         self.posicion += 1
@@ -150,12 +150,71 @@ class AnalizadorSintacticoR:
         if self.posicion < len(self.tokens) and self.tokens[self.posicion]['tipo'] != "SALTO_LINEA":
             self.agregar_error_sintactico("Sentencia debe terminar en una nueva línea")
 
-        # Agregar al nodo que lo mando a llamar
         nodo.children.append(nodo_sentencia)
 
-    def validar_switch(self, nodo_sentencia):
+    def declaracion_switch(self, nodo_sentencia):
+        nodo_switch = Nodo("switch")
+        self.posicion += 1  # Avanzar para procesar la variable
 
-        pass
+        if self.posicion >= len(self.tokens) or self.tokens[self.posicion]['valor'] != "(":
+            self.agregar_error_sintactico("Se esperaba '(' después de switch")
+            return
+
+        nodo_switch.children.append(Nodo(self.tokens[self.posicion]['valor']))
+        self.posicion += 1  # Avanzar después del '('
+
+        if self.posicion >= len(self.tokens) or self.tokens[self.posicion]['tipo'] != "IDENTIFICADOR":
+            self.agregar_error_sintactico("Se esperaba un identificador para la variable")
+            return
+        nodo_switch.children.append(Nodo(self.tokens[self.posicion]['valor']))  # Agregar variable
+        self.posicion += 1  # Avanzar después del identificador y la coma
+        if self.posicion >= len(self.tokens) or self.tokens[self.posicion]['valor'] != ",":
+            self.agregar_error_sintactico("Se esperaba ',' después del identificador")
+            return
+        self.posicion += 1  # Avanzar después de la coma
+
+        while self.posicion < len(self.tokens) and self.tokens[self.posicion]['valor'] != ")":
+            if self.tokens[self.posicion]['tipo'] == "SALTO_LINEA":
+                self.posicion += 1
+                continue
+            if self.posicion < len(self.tokens) and self.tokens[self.posicion + 1]['valor'] == ")":
+                nodo_default = Nodo("default")
+                nodo_default.children.append(Nodo(self.tokens[self.posicion]['valor']))  # Agregar default
+                nodo_switch.children.append(nodo_default)
+                self.posicion += 1
+                break
+
+            if self.tokens[self.posicion]['tipo'] != "IDENTIFICADOR":
+                self.agregar_error_sintactico("Se esperaba un identificador para el case")
+                return
+            nodo_case = Nodo("case")
+            nodo_case.children.append(Nodo(self.tokens[self.posicion]['valor']))
+            self.posicion += 1
+            if self.tokens[self.posicion]['valor'] != "=":
+                self.agregar_error_sintactico("Se esperaba '=' después del case")
+                return
+            nodo_case.children.append(Nodo(self.tokens[self.posicion]['valor']))
+            self.posicion += 1
+
+            if self.tokens[self.posicion]['tipo'] not in ("PALABRA_RESERVADA", "NUMERO", "CADENA_CORRECTA"):
+                self.agregar_error_sintactico("Valor asignado inválido")
+                return
+            nodo_case.children.append(Nodo(self.tokens[self.posicion]['valor']))
+            self.posicion += 1
+            if self.posicion < len(self.tokens) and self.tokens[self.posicion]['valor'] != ",":
+                self.agregar_error_sintactico("Se esperaba ',' después del case")
+                return
+            self.posicion += 1
+
+            nodo_switch.children.append(nodo_case)  # Agregar case al switch
+
+        if self.posicion >= len(self.tokens) or self.tokens[self.posicion]['valor'] != ")":
+            self.agregar_error_sintactico("Se esperaba ')' para cerrar el switch")
+            return
+        nodo_switch.children.append(Nodo(self.tokens[self.posicion]['valor']))
+        self.posicion += 1  # Avanzar después del ')'
+
+        nodo_sentencia.children.append(nodo_switch)  # Agregar el switch a la sentencia
 
 if __name__ == '__main__':
     codigo_r = """
@@ -168,9 +227,6 @@ if __name__ == '__main__':
                uva = "morado",
                "color desconocido")
     if (x > 5) {
-    
-    
-    
         print("Mayor que 5")
     }
     x <- 3
@@ -182,7 +238,6 @@ if __name__ == '__main__':
     for token in analizador_lexico.tokens:
         print(token)
 
-
     analizador_sintactico = AnalizadorSintacticoR()
     analizador_sintactico.analizar(codigo_r)
 
@@ -192,11 +247,9 @@ if __name__ == '__main__':
 
     print("\nÁrbol Sintáctico (AST):")
 
-
     def imprimir_ast(nodo, nivel=0):
         print("  " * nivel + str(nodo.valor))
         for hijo in nodo.children:
             imprimir_ast(hijo, nivel + 1)
-
 
     imprimir_ast(analizador_sintactico.AST)
