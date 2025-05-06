@@ -1,0 +1,17 @@
+x <- 2
+T <- TRUE
+cadena -> "si"
+
+color <- switch(tipo_fruta,
+    manzana = "rojo",
+    platano = "amarillo",
+    uva = "morado",
+    "color desconocido"
+)
+
+if x > 5 {
+    print("Mayor que 5")
+}
+
+x <- 3
+y <-
