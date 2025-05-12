@@ -105,7 +105,7 @@ class AnalizadorSemanticoR:
                     if token.isalpha() and token not in self.variables_declaradas:
                         self.agregar_error_semantico(f"Variable '{token}' usada en expresión pero no declarada", nodo_valor)
             # Si no es una expresión, verificar si es una variable declarada
-            elif valor not in self.variables_declaradas:
+            elif valor == 'identificador' and valor not in self.variables_declaradas:
                 self.agregar_error_semantico(f"Variable '{valor}' usada pero no declarada", nodo_valor)
 
     def determinar_tipo_valor(self, nodo_valor):
@@ -230,14 +230,15 @@ class AnalizadorSemanticoR:
 
     def verificar_switch(self, nodo):
         #TODO: Refactorizar para uso de R
-        if len(nodo.children) < 4:
+
+        if len(nodo.children) < 3:
             self.agregar_error_semantico("Sentencia switch incompleta", nodo)
             return
 
         # Buscar el nodo de variable (la expresión a evaluar)
         variable_encontrada = False
-        for hijo in nodo.children:
-            if hijo.valor == "IDENTIFICADOR" and len(hijo.children) > 0:
+        for hijo in nodo.children[2].children:
+            if hijo.valor == "variable" and len(hijo.children) > 0:
                 variable_encontrada = True
                 variable = hijo.children[0].valor
 

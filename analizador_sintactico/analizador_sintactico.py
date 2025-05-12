@@ -449,7 +449,6 @@ class AnalizadorSintacticoR:
             self.agregar_error_sintactico("Se esperaba '(' después de switch")
 
         # Agregar paréntesis de apertura al AST
-        nodo_switch.children.append(Nodo(self.tokens[self.posicion]['valor']))
         self.posicion += 1
 
         # Verificar variable a evaluar
@@ -500,11 +499,8 @@ class AnalizadorSintacticoR:
         if casos_procesados == 0:
             self.agregar_error_sintactico("El switch debe tener al menos un caso")
 
-        # Verificar paréntesis de cierre
 
-        # Agregar paréntesis de cierre al AST
-        nodo_switch.children.append(Nodo(self.tokens[self.posicion]['valor']))
-        self.posicion += 1
+        self.eliminar_saltos_linea()
 
         # Agregar el switch completo a la sentencia
         nodo_sentencia.children.append(nodo_switch)
