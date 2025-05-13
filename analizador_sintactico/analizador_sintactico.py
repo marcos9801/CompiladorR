@@ -145,6 +145,8 @@ class AnalizadorSintacticoR:
                 self.declaracion_if(nodo)
             elif token['valor'] == 'print':
                 self.declaracion_print(nodo)
+            elif token['valor'] == 'for':
+                self.declaracion_for(nodo)
             else:
                 # Palabra reservada no esperada
                 self.agregar_error_sintactico(f"Palabra reservada '{token['valor']}' no esperada en este contexto")
@@ -155,6 +157,73 @@ class AnalizadorSintacticoR:
             # Token no esperado, reportar error y avanzar
             self.agregar_error_sintactico(f"Token no esperado de tipo {token['tipo']}")
             self.posicion += 1
+
+    def declaracion_for(self, nodo):
+        # Verificar que el token actual es 'for'
+        nodo_for = Nodo("for")
+        if self.posicion >= len(self.tokens) or self.tokens[self.posicion]['valor'] != "for":
+            self.agregar_error_sintactico("Se esperaba 'for'")
+            return
+        self.posicion += 1  # Consumir 'for'
+
+        # Verificar apertura de paréntesis
+        if self.posicion >= len(self.tokens) or self.tokens[self.posicion]['valor'] != "(":
+            self.agregar_error_sintactico("Se esperaba '(' después de 'for'")
+            return
+        self.posicion += 1  # Consumir '('
+
+        # Verificar que viene un identificador (la variable del for)
+        if self.posicion >= len(self.tokens) or self.tokens[self.posicion]['tipo'] != "IDENTIFICADOR":
+            self.agregar_error_sintactico("Se esperaba un identificador para la variable del for")
+            return
+        nodo_iterador = Nodo('iterador')
+        nodo_for.children.append(nodo_iterador)
+        nodo_iterador.children.append(Nodo(self.tokens[self.posicion]['valor']))
+        self.posicion += 1  # Consumir variable
+
+        # Verificar 'in'
+        if self.posicion >= len(self.tokens) or self.tokens[self.posicion]['valor'] != "in":
+            self.agregar_error_sintactico("Se esperaba 'in' en la declaración del for")
+            return
+
+        nodo_iterador.children.append(Nodo(self.tokens[self.posicion]['valor']))
+        self.posicion += 1  # Consumir 'in'
+
+        # Verificar expresión o secuencia (ej. 1:10 o c(1, 2, 3))
+        if self.posicion >= len(self.tokens):
+            self.agregar_error_sintactico("Se esperaba una secuencia o expresión después de 'in'")
+            return
+        if self.posicion >= len(self.tokens) or self.tokens[self.posicion]['tipo'] != 'NUMERO':
+            self.agregar_error_sintactico("Se esperaba un numero para itera")
+            return
+        nodo_iterador.children.append(Nodo(self.tokens[self.posicion]['valor']))
+        self.posicion +=1
+
+        # Verificar cierre de paréntesis
+        if self.posicion >= len(self.tokens) or self.tokens[self.posicion]['valor'] != ")":
+            self.agregar_error_sintactico("Se esperaba ')' al final de la cabecera del for")
+            return
+        self.posicion += 1  # Consumir ')'
+        nodo_cuerpo = Nodo("cuerpo_for")
+        nodo_for.children.append(nodo_cuerpo)
+        # Verificar apertura de bloque con '{'
+        if self.posicion >= len(self.tokens) or self.tokens[self.posicion]['valor'] != "{":
+            self.agregar_error_sintactico("Se esperaba '{' para iniciar el bloque del for")
+            return
+        self.posicion += 1  # Consumir '{'
+
+        # Procesar instrucciones dentro del for
+        while self.posicion < len(self.tokens) and self.tokens[self.posicion]['valor'] != "}":
+            self.declaracion(nodo_cuerpo)  # Método que analiza cada instrucción del cuerpo
+
+        # Verificar cierre de bloque
+        if self.posicion >= len(self.tokens) or self.tokens[self.posicion]['valor'] != "}":
+            self.agregar_error_sintactico("Se esperaba '}' al final del bloque del for")
+        else:
+            self.posicion += 1  # Consumir '}'
+
+        # Verificar sentencia de ciclo
+        nodo.children.append(nodo_for)
 
     def declaracion_print(self, nodo):
         """
